@@ -17,11 +17,12 @@
   }
   .card {
     background: #fff0f6;
-    border-radius: 16px;
-    padding: 40px 50px;
+    border-radius: 20px;
+    padding: 48px 56px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(214,51,108,0.15);
     position: relative;
+    min-width: 300px;
   }
   h1 {
     color: #d6336c;
@@ -29,22 +30,26 @@
     margin-bottom: 30px;
   }
   .buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
     position: relative;
-    height: 60px;
+    height: 130px;
   }
   button {
-    padding: 12px 28px;
+    padding: 14px 32px;
     font-size: 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 30px;
     cursor: pointer;
+    font-weight: 600;
+    position: absolute;
+    left: 50%;
   }
   #yes-btn {
     background: #d6336c;
     color: white;
+    box-shadow: 0 4px 14px rgba(214,51,108,0.4);
+    transition: transform 0.15s;
+    top: 0;
+    transform: translateX(-50%);
   }
   #yes-btn:hover {
     background: #b32a5a;
@@ -52,43 +57,73 @@
   #no-btn {
     background: #fcc2d7;
     color: #842a52;
-    position: absolute;
+    transition: background 0.2s;
+    bottom: 0;
+    transform: translateX(-50%);
+  }
+  #no-btn:hover {
+    background: #f7a8c4;
   }
   #result {
     margin-top: 24px;
     font-size: 20px;
     color: #d6336c;
     min-height: 28px;
+    font-weight: 600;
+  }
+  .heart {
+    position: absolute;
+    pointer-events: none;
+    font-size: 20px;
   }
 </style>
 </head>
 <body>
   <div class="card">
-    <h1>Məni bağışlayarsan? 🌸</h1>
+    <h1>Məni bağışlayarsanmı? 🌸</h1>
     <div class="buttons">
       <button id="yes-btn" onclick="answer(true)">Hə</button>
-      <button id="no-btn" onclick="answer(false)">Yox (basma bu düyməyə) </button>
+      <button id="no-btn" onclick="answer(false)">Yox</button>
     </div>
     <div id="result"></div>
   </div>
 
 <script>
 const noBtn = document.getElementById('no-btn');
+const yesBtn = document.getElementById('yes-btn');
 const card = document.querySelector('.card');
+const result = document.getElementById('result');
+
+let pulse = setInterval(() => {
+  yesBtn.style.transform = 'translateX(-50%) scale(1.08)';
+  setTimeout(() => { yesBtn.style.transform = 'translateX(-50%) scale(1)'; }, 300);
+}, 1400);
 
 function moveNoButton() {
   const cardRect = card.getBoundingClientRect();
   const btnWidth = noBtn.offsetWidth;
   const btnHeight = noBtn.offsetHeight;
 
-  const maxX = cardRect.width - btnWidth - 10;
-  const maxY = cardRect.height - btnHeight - 10;
+  const maxX = cardRect.width - btnWidth - 20;
+  const maxY = cardRect.height - btnHeight - 20;
 
-  const randomX = Math.random() * maxX;
-  const randomY = Math.random() * maxY;
+  const yesRect = yesBtn.getBoundingClientRect();
+  let tries = 0, randomX, randomY;
+
+  do {
+    randomX = Math.random() * maxX;
+    randomY = Math.random() * maxY;
+    tries++;
+  } while (
+    tries < 20 &&
+    Math.abs(randomX - (yesRect.left - cardRect.left)) < btnWidth + 10 &&
+    Math.abs(randomY - (yesRect.top - cardRect.top)) < btnHeight + 10
+  );
 
   noBtn.style.left = randomX + 'px';
   noBtn.style.top = randomY + 'px';
+  noBtn.style.transform = 'none';
+  noBtn.style.bottom = 'auto';
 }
 
 noBtn.addEventListener('mouseenter', moveNoButton);
@@ -97,10 +132,31 @@ noBtn.addEventListener('touchstart', function(e) {
   moveNoButton();
 });
 
+function spawnHearts() {
+  for (let i = 0; i < 14; i++) {
+    const h = document.createElement('div');
+    h.textContent = '💗';
+    h.className = 'heart';
+    h.style.left = (40 + Math.random() * 220) + 'px';
+    h.style.top = '60px';
+    h.style.fontSize = (14 + Math.random() * 10) + 'px';
+    h.style.transition = 'all 1.2s ease-out';
+    card.appendChild(h);
+    requestAnimationFrame(() => {
+      h.style.top = (-40 - Math.random() * 60) + 'px';
+      h.style.opacity = '0';
+      h.style.transform = 'translateX(' + (Math.random() * 60 - 30) + 'px)';
+    });
+    setTimeout(() => h.remove(), 1300);
+  }
+}
+
 function answer(isYes) {
-  const result = document.getElementById('result');
   if (isYes) {
-    result.textContent = "Ayallasan. Yalandan vurdun bilirəm. Barışmaq istəsən, yaz :( 💕";
+    clearInterval(pulse);
+    yesBtn.style.transform = 'translateX(-50%) scale(1.1)';
+    result.textContent = "Ayallasan, bilirəm yalandan vurdun. Barışmaq istəsən, yaz :( Səni sevirəm 💕";
+    spawnHearts();
   }
 }
 </script>

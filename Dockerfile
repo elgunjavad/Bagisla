@@ -8,4 +8,4 @@ WORKDIR /app
 COPY --from=build /app/out .
 ENV ASPNETCORE_URLS=http://+:10000
 EXPOSE 10000
-ENTRYPOINT ["dotnet", "DateInviteWeb.dll"]
+ENTRYPOINT ["dotnet", "Bagisla.dll"]
